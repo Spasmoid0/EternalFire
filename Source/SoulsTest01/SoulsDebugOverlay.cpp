@@ -2,12 +2,16 @@
 
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
+#include "RHI.h"
 
 ASoulsDebugOverlay::ASoulsDebugOverlay()
 {
 	bDebugVisible = false;
+	SmoothedFPS = 0.0f;
+	SmoothedFrameTime = 0.0f;
 }
 
 void ASoulsDebugOverlay::ToggleDebug()
@@ -24,7 +28,43 @@ void ASoulsDebugOverlay::DrawHUD()
 		return;
 	}
 
+	UpdatePerformanceStats();
 	DrawDebugOverlay();
+}
+
+void ASoulsDebugOverlay::UpdatePerformanceStats()
+{
+	const float DeltaTime = GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.0f;
+
+	if (DeltaTime <= 0.0f)
+	{
+		return;
+	}
+
+	const float CurrentFPS = 1.0f / DeltaTime;
+	const float CurrentFrameTime = DeltaTime * 1000.0f;
+
+	constexpr float Smoothing = 0.1f;
+
+	if (SmoothedFPS <= 0.0f)
+	{
+		SmoothedFPS = CurrentFPS;
+		SmoothedFrameTime = CurrentFrameTime;
+	}
+	else
+	{
+		SmoothedFPS = FMath::Lerp(
+			SmoothedFPS,
+			CurrentFPS,
+			Smoothing
+		);
+
+		SmoothedFrameTime = FMath::Lerp(
+			SmoothedFrameTime,
+			CurrentFrameTime,
+			Smoothing
+		);
+	}
 }
 
 void ASoulsDebugOverlay::DrawDebugOverlay()
@@ -36,8 +76,22 @@ void ASoulsDebugOverlay::DrawDebugOverlay()
 
 	float Y = 30.0f;
 
+	int32 SizeX = 0;
+	int32 SizeY = 0;
+
+	APlayerController* PC = GetOwningPlayerController();
+
+	if (PC)
+	{
+		PC->GetViewportSize(SizeX, SizeY);
+	}
+
+	// -------------------------------------------------
+	// Header
+	// -------------------------------------------------
+
 	DrawTextLine(
-		TEXT("SOULSTEST01 DEBUG"),
+		TEXT("Souls Debug Overlay"),
 		30.0f,
 		Y,
 		1.3f
@@ -45,18 +99,22 @@ void ASoulsDebugOverlay::DrawDebugOverlay()
 
 	Y += 35.0f;
 
-	const float DeltaTime = FApp::GetDeltaTime();
+	// -------------------------------------------------
+	// Performance
+	// -------------------------------------------------
 
-	const float FPS = DeltaTime > 0.0f
-		? 1.0f / DeltaTime
-		: 0.0f;
+	DrawTextLine(
+		TEXT("PERFORMANCE"),
+		30.0f,
+		Y
+	);
 
-	const float FrameTime = DeltaTime * 1000.0f;
+	Y += 22.0f;
 
 	DrawTextLine(
 		FString::Printf(
 			TEXT("FPS: %.1f"),
-			FPS
+			SmoothedFPS
 		),
 		30.0f,
 		Y
@@ -67,7 +125,7 @@ void ASoulsDebugOverlay::DrawDebugOverlay()
 	DrawTextLine(
 		FString::Printf(
 			TEXT("Frame Time: %.2f ms"),
-			FrameTime
+			SmoothedFrameTime
 		),
 		30.0f,
 		Y
@@ -75,10 +133,68 @@ void ASoulsDebugOverlay::DrawDebugOverlay()
 
 	Y += 35.0f;
 
-	APlayerController* PC = GetOwningPlayerController();
+	// -------------------------------------------------
+	// Engine
+	// -------------------------------------------------
+
+	DrawTextLine(
+		TEXT("ENGINE"),
+		30.0f,
+		Y
+	);
+
+	Y += 22.0f;
+
+	FString RHIName = TEXT("Unknown");
+
+	if (GDynamicRHI)
+	{
+		RHIName = GDynamicRHI->GetName();
+	}
+
+	DrawTextLine(
+		FString::Printf(
+			TEXT("RHI: %s"),
+			*RHIName
+		),
+		30.0f,
+		Y
+	);
+
+	Y += 22.0f;
+
+	DrawTextLine(
+		FString::Printf(
+			TEXT("Resolution: %d x %d"),
+			SizeX,
+			SizeY
+		),
+		30.0f,
+		Y
+	);
+
+	Y += 35.0f;
+
+	// -------------------------------------------------
+	// Player
+	// -------------------------------------------------
+
+	DrawTextLine(
+		TEXT("PLAYER"),
+		30.0f,
+		Y
+	);
+
+	Y += 22.0f;
 
 	if (!PC)
 	{
+		DrawTextLine(
+			TEXT("Player Controller: NONE"),
+			30.0f,
+			Y
+		);
+
 		return;
 	}
 
@@ -87,7 +203,7 @@ void ASoulsDebugOverlay::DrawDebugOverlay()
 	if (!Pawn)
 	{
 		DrawTextLine(
-			TEXT("PLAYER: NONE"),
+			TEXT("Pawn: NONE"),
 			30.0f,
 			Y
 		);
@@ -97,14 +213,6 @@ void ASoulsDebugOverlay::DrawDebugOverlay()
 
 	const FVector Location = Pawn->GetActorLocation();
 	const FVector Velocity = Pawn->GetVelocity();
-
-	DrawTextLine(
-		TEXT("PLAYER"),
-		30.0f,
-		Y
-	);
-
-	Y += 22.0f;
 
 	DrawTextLine(
 		FString::Printf(

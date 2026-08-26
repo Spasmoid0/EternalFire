@@ -22,6 +22,11 @@ private:
 
 	bool bDebugVisible = false;
 
+	float SmoothedFPS = 0.0f;
+	float SmoothedFrameTime = 0.0f;
+
+	void UpdatePerformanceStats();
+
 	void DrawDebugOverlay();
 
 	void DrawTextLine(
