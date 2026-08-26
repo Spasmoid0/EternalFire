@@ -1,15 +1,33 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameFramework/HUD.h"
+#include "SoulsDebugOverlay.generated.h"
 
-/**
- * 
- */
-class SOULSTEST01_API SoulsDebugOverlay
+UCLASS()
+class SOULSTEST01_API ASoulsDebugOverlay : public AHUD
 {
+	GENERATED_BODY()
+
 public:
-	SoulsDebugOverlay();
-	~SoulsDebugOverlay();
+
+	ASoulsDebugOverlay();
+
+	virtual void DrawHUD() override;
+
+	UFUNCTION(BlueprintCallable, Category = "Debug")
+	void ToggleDebug();
+
+private:
+
+	bool bDebugVisible = false;
+
+	void DrawDebugOverlay();
+
+	void DrawTextLine(
+		const FString& Text,
+		float X,
+		float Y,
+		float Scale = 1.0f
+	);
 };
