@@ -8,7 +8,7 @@ Saved/
 .vs/
 .vscode/
 .idea/
-*.sln
+
 *.suo
 *.opensdf
 *.sdf
