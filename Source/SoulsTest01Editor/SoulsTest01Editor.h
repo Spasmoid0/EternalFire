@@ -13,6 +13,10 @@ public:
 
 
 private:
+	
+	TSharedRef<SWidget> BuildActorRow(
+	const FSoulsTickAuditEntry& Entry
+);
 
 	void RegisterMenus();
 
@@ -21,6 +25,8 @@ private:
 	void RefreshTickAudit();
 
 	TSharedRef<SWidget> BuildTickAuditWidget();
+	
+	void PopulateTickAuditList();
 
 	TArray<FSoulsTickAuditEntry> TickEntries;
 

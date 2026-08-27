@@ -112,7 +112,7 @@ void FSoulsTest01EditorModule::OpenTickAudit(
 			)
 		)
 		.ClientSize(
-			FVector2D(850.0f, 650.0f)
+			FVector2D(900.0f, 650.0f)
 		)
 		.SupportsMaximize(true)
 		.SupportsMinimize(false);
@@ -122,6 +122,8 @@ void FSoulsTest01EditorModule::OpenTickAudit(
 	);
 
 	FSlateApplication::Get().AddWindow(Window);
+
+	PopulateTickAuditList();
 }
 
 
@@ -165,6 +167,20 @@ TSharedRef<SWidget> FSoulsTest01EditorModule::BuildTickAuditWidget()
 		FSoulsTickAudit::CountTickingComponents(
 			TickEntries
 		);
+	
+	if (ActorList.IsValid())
+	{
+		ActorList->ClearChildren();
+
+		for (const FSoulsTickAuditEntry& Entry : TickEntries)
+		{
+			ActorList->AddSlot()
+			.AutoHeight()
+			[
+				BuildActorRow(Entry)
+			];
+		}
+	}
 
 	return
 		SNew(SVerticalBox)
@@ -263,6 +279,77 @@ TSharedRef<SWidget> FSoulsTest01EditorModule::BuildTickAuditWidget()
 				}
 			)
 		];
+}
+
+TSharedRef<SWidget> FSoulsTest01EditorModule::BuildActorRow(
+	const FSoulsTickAuditEntry& Entry
+)
+{
+	return
+		SNew(SButton)
+		.ButtonStyle(FCoreStyle::Get(), "NoBorder")
+		.OnClicked_Lambda(
+			[Actor = Entry.Actor]()
+			{
+				if (AActor* SelectedActor = Actor.Get())
+				{
+					if (GEditor)
+					{
+						GEditor->SelectNone(
+							false,
+							true,
+							false
+						);
+
+						GEditor->SelectActor(
+							SelectedActor,
+							true,
+							true
+						);
+
+						GEditor->NoteSelectionChange();
+					}
+				}
+
+				return FReply::Handled();
+			}
+		)
+		[
+			SNew(STextBlock)
+			.Text(
+				FText::FromString(
+					FString::Printf(
+						TEXT("%-40s | %-30s | Tick: %s | Components: %d"),
+						*Entry.ActorName,
+						*Entry.ActorClass,
+						Entry.bActorTicks
+							? TEXT("YES")
+							: TEXT("NO"),
+						Entry.TickingComponentCount
+					)
+				)
+			)
+		];
+}
+
+void FSoulsTest01EditorModule::PopulateTickAuditList()
+{
+	if (!ActorList.IsValid())
+	{
+		return;
+	}
+
+	ActorList->ClearChildren();
+
+	for (const FSoulsTickAuditEntry& Entry : TickEntries)
+	{
+		ActorList->AddSlot()
+		.AutoHeight()
+		.Padding(2.0f)
+		[
+			BuildActorRow(Entry)
+		];
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
