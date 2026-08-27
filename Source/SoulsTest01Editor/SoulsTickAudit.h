@@ -9,8 +9,11 @@ struct FSoulsTickAuditEntry
 {
 	FString ActorName;
 	FString ActorClass;
+
 	bool bActorTicks = false;
+
 	int32 TickingComponentCount = 0;
+
 	float TickInterval = 0.0f;
 
 	TWeakObjectPtr<AActor> Actor;
@@ -23,6 +26,10 @@ public:
 	static void ScanWorld(
 		UWorld* World,
 		TArray<FSoulsTickAuditEntry>& OutEntries
+	);
+
+	static int32 CountActors(
+		UWorld* World
 	);
 
 	static int32 CountTickingActors(

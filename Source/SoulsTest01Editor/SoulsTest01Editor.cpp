@@ -8,6 +8,11 @@
 #include "Logging/LogMacros.h"
 
 #include "ToolMenu.h"
+#include "SoulsTickAudit.h"
+#include "Editor.h"
+#include "Widgets/SWidget.h"
+#include "Widgets/Input/SButton.h"
+#include "Widgets/Layout/SScrollBox.h"
 
 
 
@@ -96,6 +101,8 @@ void FSoulsTest01EditorModule::OpenTickAudit(
 	const FToolMenuContext& Context
 )
 {
+	RefreshTickAudit();
+
 	TSharedRef<SWindow> Window =
 		SNew(SWindow)
 		.Title(
@@ -105,27 +112,157 @@ void FSoulsTest01EditorModule::OpenTickAudit(
 			)
 		)
 		.ClientSize(
-			FVector2D(700.0f, 500.0f)
+			FVector2D(850.0f, 650.0f)
 		)
 		.SupportsMaximize(true)
 		.SupportsMinimize(false);
 
 	Window->SetContent(
-		SNew(SBox)
-		.Padding(20.0f)
+		BuildTickAuditWidget()
+	);
+
+	FSlateApplication::Get().AddWindow(Window);
+}
+
+
+void FSoulsTest01EditorModule::RefreshTickAudit()
+{
+	TickEntries.Reset();
+
+	UWorld* World = nullptr;
+
+	if (GEditor)
+	{
+		World = GEditor->GetEditorWorldContext().World();
+	}
+
+	TickAuditWorld = World;
+
+	if (!World)
+	{
+		return;
+	}
+
+	FSoulsTickAudit::ScanWorld(
+		World,
+		TickEntries
+	);
+}
+
+TSharedRef<SWidget> FSoulsTest01EditorModule::BuildTickAuditWidget()
+{
+	const int32 ActorCount =
+		FSoulsTickAudit::CountActors(
+			TickAuditWorld.Get()
+		);
+
+	const int32 TickingActors =
+		FSoulsTickAudit::CountTickingActors(
+			TickEntries
+		);
+
+	const int32 TickingComponents =
+		FSoulsTickAudit::CountTickingComponents(
+			TickEntries
+		);
+
+	return
+		SNew(SVerticalBox)
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(10.0f)
 		[
 			SNew(STextBlock)
 			.Text(
 				LOCTEXT(
-					"TickAuditPlaceholder",
-					"SoulsTest01 Tick Audit\n\n"
-					"Scanner coming next..."
+					"TickAuditHeader",
+					"SOULSTEST01 — TICK AUDIT"
 				)
 			)
 		]
-	);
 
-	FSlateApplication::Get().AddWindow(Window);
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(10.0f)
+		[
+			SNew(STextBlock)
+			.Text(
+				FText::Format(
+					LOCTEXT(
+						"ActorCount",
+						"Actors: {0}"
+					),
+					ActorCount
+				)
+			)
+		]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(10.0f)
+		[
+			SNew(STextBlock)
+			.Text(
+				FText::Format(
+					LOCTEXT(
+						"TickingActorCount",
+						"Actors with Tick: {0}"
+					),
+					TickingActors
+				)
+			)
+		]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(10.0f)
+		[
+			SNew(STextBlock)
+			.Text(
+				FText::Format(
+					LOCTEXT(
+						"TickingComponentCount",
+						"Components with Tick: {0}"
+					),
+					TickingComponents
+				)
+			)
+		]
+
+		+ SVerticalBox::Slot()
+		.FillHeight(1.0f)
+		.Padding(10.0f)
+		[
+			SNew(SScrollBox)
+
+			+ SScrollBox::Slot()
+			[
+				SAssignNew(ActorList, SVerticalBox)
+			]
+		]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.HAlign(HAlign_Right)
+		.Padding(10.0f)
+		[
+			SNew(SButton)
+			.Text(
+				LOCTEXT(
+					"RefreshButton",
+					"Refresh"
+				)
+			)
+			.OnClicked_Lambda(
+				[this]()
+				{
+					RefreshTickAudit();
+
+					return FReply::Handled();
+				}
+			)
+		];
 }
 
 #undef LOCTEXT_NAMESPACE
