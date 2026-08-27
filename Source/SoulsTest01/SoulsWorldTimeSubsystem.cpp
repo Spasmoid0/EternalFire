@@ -1,6 +1,7 @@
 ﻿#include "SoulsWorldTimeSubsystem.h"
 #include "Tickable.h"
 #include "Engine/World.h"
+#include "Engine/Engine.h"
 
 void USoulsWorldTimeSubsystem::Initialize(
 	FSubsystemCollectionBase& Collection
@@ -114,7 +115,8 @@ bool USoulsWorldTimeSubsystem::IsNight() const
 	return !IsDay();
 }
 
-//EXPOSE TO BLUEPRINT
+
+// EXPOSE TO BLUEPRINT
 USoulsWorldTimeSubsystem*
 USoulsWorldTimeSubsystem::GetSoulsWorldTimeSubsystem(
 	UObject* WorldContextObject
@@ -125,7 +127,11 @@ USoulsWorldTimeSubsystem::GetSoulsWorldTimeSubsystem(
 		return nullptr;
 	}
 
-	UWorld* World = WorldContextObject->GetWorld();
+	UWorld* World =
+		GEngine->GetWorldFromContextObject(
+			WorldContextObject,
+			EGetWorldErrorMode::ReturnNull
+		);
 
 	if (!World)
 	{

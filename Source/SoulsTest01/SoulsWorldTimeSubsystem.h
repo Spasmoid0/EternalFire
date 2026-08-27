@@ -30,7 +30,11 @@ public:
 	float DayLengthSeconds = 1200.0f;
 	
 	//OBJECT EXPOSED FOR BLUEPRINTS
-	UFUNCTION(BlueprintPure, Category = "World Time")
+	UFUNCTION(
+		BlueprintPure,
+		Category = "World Time",
+		meta = (WorldContext = "WorldContextObject")
+	)
 	static USoulsWorldTimeSubsystem* GetSoulsWorldTimeSubsystem(
 		UObject* WorldContextObject
 	);
