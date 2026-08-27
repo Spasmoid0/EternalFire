@@ -4,16 +4,16 @@
 	"Category": "",
 	"Description": "",
 	"Modules": [
-	{
-		"Name": "SoulsTest01",
-		"Type": "Runtime",
-		"LoadingPhase": "Default"
-	},
-	{
-		"Name": "SoulsTest01Editor",
-		"Type": "Editor",
-		"LoadingPhase": "Default"
-	}
+		{
+			"Name": "SoulsTest01",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "SoulsTest01Editor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
 	],
 	"Plugins": [
 		{
@@ -25,6 +25,14 @@
 		},
 		{
 			"Name": "GameplayStateTree",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineServicesEOS",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineServicesEOSGS",
 			"Enabled": true
 		}
 	],
