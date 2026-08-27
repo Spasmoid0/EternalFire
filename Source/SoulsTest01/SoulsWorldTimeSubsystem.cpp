@@ -140,3 +140,29 @@ USoulsWorldTimeSubsystem::GetSoulsWorldTimeSubsystem(
 
 	return World->GetSubsystem<USoulsWorldTimeSubsystem>();
 }
+
+FText USoulsWorldTimeSubsystem::GetFormattedTime() const
+{
+	const int32 TotalMinutes = FMath::FloorToInt(TimeOfDay * 60.0f);
+
+	const int32 Hours24 = (TotalMinutes / 60) % 24;
+	const int32 Minutes = TotalMinutes % 60;
+
+	const bool bPM = Hours24 >= 12;
+
+	int32 Hours12 = Hours24 % 12;
+
+	if (Hours12 == 0)
+	{
+		Hours12 = 12;
+	}
+
+	return FText::FromString(
+		FString::Printf(
+			TEXT("%02d:%02d %s"),
+			Hours12,
+			Minutes,
+			bPM ? TEXT("PM") : TEXT("AM")
+		)
+	);
+}
