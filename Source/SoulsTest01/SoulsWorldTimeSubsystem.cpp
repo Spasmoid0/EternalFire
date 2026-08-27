@@ -169,5 +169,8 @@ FText USoulsWorldTimeSubsystem::GetFormattedTime() const
 
 float USoulsWorldTimeSubsystem::GetSunRotation() const
 {
-	return (TimeOfDay / 24.0f) * 360.0f;
+	const float SolarAngle =
+		(TimeOfDay - 12.0f) / 12.0f * PI;
+
+	return -90.0f * FMath::Cos(SolarAngle);
 }
