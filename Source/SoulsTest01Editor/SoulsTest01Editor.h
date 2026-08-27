@@ -26,6 +26,8 @@ private:
 
 	TSharedRef<SWidget> BuildTickAuditWidget();
 	
+	TSharedRef<SWidget> BuildTickAuditHeader();
+	
 	void PopulateTickAuditList();
 
 	TArray<FSoulsTickAuditEntry> TickEntries;

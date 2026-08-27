@@ -13,6 +13,7 @@
 #include "Widgets/SWidget.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SScrollBox.h"
+#include "Widgets/SBoxPanel.h"
 
 
 
@@ -167,7 +168,7 @@ TSharedRef<SWidget> FSoulsTest01EditorModule::BuildTickAuditWidget()
 		FSoulsTickAudit::CountTickingComponents(
 			TickEntries
 		);
-	
+	/*
 	if (ActorList.IsValid())
 	{
 		ActorList->ClearChildren();
@@ -180,7 +181,7 @@ TSharedRef<SWidget> FSoulsTest01EditorModule::BuildTickAuditWidget()
 				BuildActorRow(Entry)
 			];
 		}
-	}
+	}*/
 
 	return
 		SNew(SVerticalBox)
@@ -202,61 +203,68 @@ TSharedRef<SWidget> FSoulsTest01EditorModule::BuildTickAuditWidget()
 		.AutoHeight()
 		.Padding(10.0f)
 		[
-			SNew(STextBlock)
-			.Text(
-				FText::Format(
-					LOCTEXT(
-						"ActorCount",
-						"Actors: {0}"
-					),
-					ActorCount
-				)
-			)
+			SAssignNew(ActorCountText, STextBlock)
+.Text(
+	FText::Format(
+		LOCTEXT(
+			"ActorCount",
+			"Actors: {0}"
+		),
+		ActorCount
+	)
+)
 		]
 
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.Padding(10.0f)
 		[
-			SNew(STextBlock)
-			.Text(
-				FText::Format(
-					LOCTEXT(
-						"TickingActorCount",
-						"Actors with Tick: {0}"
-					),
-					TickingActors
-				)
-			)
+			SAssignNew(TickingActorCountText, STextBlock)
+.Text(
+	FText::Format(
+		LOCTEXT(
+			"TickingActorCount",
+			"Actors with Tick: {0}"
+		),
+		TickingActors
+	)
+)
 		]
 
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.Padding(10.0f)
 		[
-			SNew(STextBlock)
-			.Text(
-				FText::Format(
-					LOCTEXT(
-						"TickingComponentCount",
-						"Components with Tick: {0}"
-					),
-					TickingComponents
-				)
-			)
+			SAssignNew(TickingComponentCountText, STextBlock)
+.Text(
+	FText::Format(
+		LOCTEXT(
+			"TickingComponentCount",
+			"Components with Tick: {0}"
+		),
+		TickingComponents
+	)
+)
 		]
 
 		+ SVerticalBox::Slot()
-		.FillHeight(1.0f)
-		.Padding(10.0f)
-		[
-			SNew(SScrollBox)
+.AutoHeight()
+.Padding(10.0f, 10.0f, 10.0f, 4.0f)
+[
+	BuildTickAuditHeader()
+]
 
-			+ SScrollBox::Slot()
-			[
-				SAssignNew(ActorList, SVerticalBox)
-			]
-		]
++ SVerticalBox::Slot()
+.FillHeight(1.0f)
+.Padding(10.0f, 0.0f, 10.0f, 10.0f)
+[
+	SNew(SScrollBox)
+
+	+ SScrollBox::Slot()
+	[
+		SAssignNew(ActorList, SVerticalBox)
+	]
+]
 
 		+ SVerticalBox::Slot()
 		.AutoHeight()
@@ -271,13 +279,59 @@ TSharedRef<SWidget> FSoulsTest01EditorModule::BuildTickAuditWidget()
 				)
 			)
 			.OnClicked_Lambda(
-				[this]()
-				{
-					RefreshTickAudit();
+	[this]()
+	{
+		RefreshTickAudit();
+		PopulateTickAuditList();
 
-					return FReply::Handled();
-				}
-			)
+		if (ActorCountText.IsValid())
+		{
+			ActorCountText->SetText(
+				FText::Format(
+					LOCTEXT(
+						"ActorCount",
+						"Actors: {0}"
+					),
+					FSoulsTickAudit::CountActors(
+						TickAuditWorld.Get()
+					)
+				)
+			);
+		}
+
+		if (TickingActorCountText.IsValid())
+		{
+			TickingActorCountText->SetText(
+				FText::Format(
+					LOCTEXT(
+						"TickingActorCount",
+						"Actors with Tick: {0}"
+					),
+					FSoulsTickAudit::CountTickingActors(
+						TickEntries
+					)
+				)
+			);
+		}
+
+		if (TickingComponentCountText.IsValid())
+		{
+			TickingComponentCountText->SetText(
+				FText::Format(
+					LOCTEXT(
+						"TickingComponentCount",
+						"Components with Tick: {0}"
+					),
+					FSoulsTickAudit::CountTickingComponents(
+						TickEntries
+					)
+				)
+			);
+		}
+
+		return FReply::Handled();
+	}
+)
 		];
 }
 
@@ -288,6 +342,7 @@ TSharedRef<SWidget> FSoulsTest01EditorModule::BuildActorRow(
 	return
 		SNew(SButton)
 		.ButtonStyle(FCoreStyle::Get(), "NoBorder")
+		.ContentPadding(FMargin(6.0f, 4.0f))
 		.OnClicked_Lambda(
 			[Actor = Entry.Actor]()
 			{
@@ -315,18 +370,115 @@ TSharedRef<SWidget> FSoulsTest01EditorModule::BuildActorRow(
 			}
 		)
 		[
-			SNew(STextBlock)
-			.Text(
-				FText::FromString(
-					FString::Printf(
-						TEXT("%-40s | %-30s | Tick: %s | Components: %d"),
-						*Entry.ActorName,
-						*Entry.ActorClass,
-						Entry.bActorTicks
-							? TEXT("YES")
-							: TEXT("NO"),
+			SNew(SHorizontalBox)
+
+			// Actor
+			+ SHorizontalBox::Slot()
+			.FillWidth(0.35f)
+			[
+				SNew(STextBlock)
+				.Text(
+					FText::FromString(
+						Entry.ActorName
+					)
+				)
+			]
+
+			// Class
+			+ SHorizontalBox::Slot()
+			.FillWidth(0.35f)
+			[
+				SNew(STextBlock)
+				.Text(
+					FText::FromString(
+						Entry.ActorClass
+					)
+				)
+			]
+
+			// Tick
+			+ SHorizontalBox::Slot()
+			.FillWidth(0.15f)
+			[
+				SNew(STextBlock)
+				.Text(
+					Entry.bActorTicks
+						? FText::FromString(TEXT("YES"))
+						: FText::FromString(TEXT("NO"))
+				)
+			]
+
+			// Components
+			+ SHorizontalBox::Slot()
+			.FillWidth(0.15f)
+			[
+				SNew(STextBlock)
+				.Text(
+					FText::AsNumber(
 						Entry.TickingComponentCount
 					)
+				)
+			]
+		];
+}
+
+TSharedRef<SWidget> FSoulsTest01EditorModule::BuildTickAuditHeader()
+{
+	return
+		SNew(SHorizontalBox)
+
+		// Actor
+		+ SHorizontalBox::Slot()
+		.FillWidth(0.35f)
+		.Padding(6.0f)
+		[
+			SNew(STextBlock)
+			.Text(
+				LOCTEXT(
+					"ActorColumnHeader",
+					"Actor"
+				)
+			)
+		]
+
+		// Class
+		+ SHorizontalBox::Slot()
+		.FillWidth(0.35f)
+		.Padding(6.0f)
+		[
+			SNew(STextBlock)
+			.Text(
+				LOCTEXT(
+					"ClassColumnHeader",
+					"Class"
+				)
+			)
+		]
+
+		// Tick
+		+ SHorizontalBox::Slot()
+		.FillWidth(0.15f)
+		.Padding(6.0f)
+		[
+			SNew(STextBlock)
+			.Text(
+				LOCTEXT(
+					"TickColumnHeader",
+					"Tick"
+				)
+			)
+		]
+
+		// Components
+		+ SHorizontalBox::Slot()
+		.FillWidth(0.15f)
+		.Padding(6.0f)
+		[
+			SNew(STextBlock)
+			.Text(
+				LOCTEXT(
+					"ComponentsColumnHeader",
+					"Components"
 				)
 			)
 		];
