@@ -2,10 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "Tickable.h"
 #include "SoulsWorldTimeSubsystem.generated.h"
 
+
 UCLASS()
-class SOULSTEST01_API USoulsWorldTimeSubsystem : public UWorldSubsystem
+class SOULSTEST01_API USoulsWorldTimeSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -35,9 +37,11 @@ public:
 
 	virtual void Deinitialize() override;
 
-	virtual void Tick(
-		float DeltaTime
-	);
+	virtual void Tick(float DeltaTime) override;
+
+	virtual bool IsTickable() const override;
+
+	virtual TStatId GetStatId() const override;
 
 	UFUNCTION(BlueprintPure, Category = "World Time")
 	float GetTimeOfDay() const;
