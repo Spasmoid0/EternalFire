@@ -64,6 +64,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "World Time")
 	float GetTimeOfDay() const;
+	
+	UFUNCTION(BlueprintPure, Category = "World Time")
+	float GetSunRotation() const;
 
 	UFUNCTION(BlueprintPure, Category = "World Time")
 	int32 GetDayNumber() const;

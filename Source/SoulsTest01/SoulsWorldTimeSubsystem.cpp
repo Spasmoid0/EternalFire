@@ -166,3 +166,8 @@ FText USoulsWorldTimeSubsystem::GetFormattedTime() const
 		)
 	);
 }
+
+float USoulsWorldTimeSubsystem::GetSunRotation() const
+{
+	return (TimeOfDay / 24.0f) * 360.0f;
+}
