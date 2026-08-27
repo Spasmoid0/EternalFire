@@ -1,9 +1,9 @@
 ﻿#include "SoulsTickAudit.h"
 
 #include "Engine/World.h"
+#include "EngineUtils.h"
 #include "GameFramework/Actor.h"
 #include "Components/ActorComponent.h"
-#include "EngineUtils.h"
 
 void FSoulsTickAudit::ScanWorld(
 	UWorld* World,
@@ -53,13 +53,35 @@ void FSoulsTickAudit::ScanWorld(
 
 		Entry.ActorName = Actor->GetActorLabel();
 		Entry.ActorClass = Actor->GetClass()->GetName();
+
 		Entry.bActorTicks = bActorTicks;
 		Entry.TickingComponentCount = TickingComponents;
 		Entry.TickInterval = Actor->PrimaryActorTick.TickInterval;
+
 		Entry.Actor = Actor;
 
 		OutEntries.Add(MoveTemp(Entry));
 	}
+}
+
+int32 FSoulsTickAudit::CountActors(UWorld* World)
+{
+	if (!World)
+	{
+		return 0;
+	}
+
+	int32 Count = 0;
+
+	for (TActorIterator<AActor> It(World); It; ++It)
+	{
+		if (IsValid(*It))
+		{
+			Count++;
+		}
+	}
+
+	return Count;
 }
 
 int32 FSoulsTickAudit::CountTickingActors(
