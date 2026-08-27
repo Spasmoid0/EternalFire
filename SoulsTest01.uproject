@@ -4,11 +4,16 @@
 	"Category": "",
 	"Description": "",
 	"Modules": [
-		{
-			"Name": "SoulsTest01",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		}
+	{
+		"Name": "SoulsTest01",
+		"Type": "Runtime",
+		"LoadingPhase": "Default"
+	},
+	{
+		"Name": "SoulsTest01Editor",
+		"Type": "Editor",
+		"LoadingPhase": "Default"
+	}
 	],
 	"Plugins": [
 		{
