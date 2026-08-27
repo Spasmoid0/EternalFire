@@ -13,8 +13,7 @@ class SOULSTEST01_API USoulsWorldTimeSubsystem : public UTickableWorldSubsystem
 
 public:
 	
-	UFUNCTION(BlueprintPure, Category = "World Time")
-	FText GetFormattedTime() const;
+
 
 	// Current time of day, represented as hours from 0.0 to 24.0.
 	UPROPERTY(BlueprintReadOnly, Category = "World Time")
@@ -41,6 +40,13 @@ public:
 	static USoulsWorldTimeSubsystem* GetSoulsWorldTimeSubsystem(
 		UObject* WorldContextObject
 	);
+	
+	UFUNCTION(
+	BlueprintPure,
+	Category = "World Time",
+	meta = (WorldContext = "WorldContextObject")
+)
+	FText GetFormattedTime() const;
 
 public:
 
