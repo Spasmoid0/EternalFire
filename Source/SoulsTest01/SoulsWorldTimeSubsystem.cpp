@@ -112,3 +112,24 @@ bool USoulsWorldTimeSubsystem::IsNight() const
 {
 	return !IsDay();
 }
+
+//EXPOSE TO BLUEPRINT
+USoulsWorldTimeSubsystem*
+USoulsWorldTimeSubsystem::GetSoulsWorldTimeSubsystem(
+	UObject* WorldContextObject
+)
+{
+	if (!WorldContextObject)
+	{
+		return nullptr;
+	}
+
+	UWorld* World = WorldContextObject->GetWorld();
+
+	if (!World)
+	{
+		return nullptr;
+	}
+
+	return World->GetSubsystem<USoulsWorldTimeSubsystem>();
+}

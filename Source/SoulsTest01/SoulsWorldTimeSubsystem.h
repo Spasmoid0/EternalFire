@@ -28,6 +28,12 @@ public:
 	// How many real seconds are required for one full in-game day.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Time")
 	float DayLengthSeconds = 1200.0f;
+	
+	//OBJECT EXPOSED FOR BLUEPRINTS
+	UFUNCTION(BlueprintPure, Category = "World Time")
+	static USoulsWorldTimeSubsystem* GetSoulsWorldTimeSubsystem(
+		UObject* WorldContextObject
+	);
 
 public:
 
