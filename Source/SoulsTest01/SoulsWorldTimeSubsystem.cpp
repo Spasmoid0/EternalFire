@@ -1,5 +1,6 @@
 ﻿#include "SoulsWorldTimeSubsystem.h"
 #include "Tickable.h"
+#include "Engine/World.h"
 
 void USoulsWorldTimeSubsystem::Initialize(
 	FSubsystemCollectionBase& Collection
